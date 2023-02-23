@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import Animated, { useAnimatedGestureHandler, useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 
-export const SecondAnimations: React.FC = () => {
+export const DragAndDrop: React.FC = () => {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 

@@ -1,6 +1,6 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {FirstAnimations} from './src/animations/FirstAnimations';
-import { SecondAnimations } from './src/animations/SecondAnimations';
+import { DragAndDrop } from './src/animations/DragAndDrop';
 import { Button, View } from 'react-native';
 import React, { useState } from 'react';
 
@@ -18,7 +18,7 @@ export default function App() {
             <Button title="Second Animation" onPress={() => setFirstAnimations(false)} />
           </View>
         </> : <>
-          <SecondAnimations />
+          <DragAndDrop />
           <View style={{ paddingBottom: 20 }}>
             <Button title="First Animation" onPress={() => setFirstAnimations(true)} />
           </View>
