@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import Animated, {
-  useAnimatedGestureHandler,
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withTiming
+  withTiming,
+  runOnJS
 } from 'react-native-reanimated';
-import { PanGestureHandler, GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 
 type MeasureProps = {
   x: number;
@@ -16,77 +15,74 @@ type MeasureProps = {
   height: number;
 };
 
-export const DragAndDrop: React.FC = () => {
-  const [measure, setMeasure] = useState<MeasureProps | null>(null);
+import { Dimensions } from 'react-native';
+const { width } = Dimensions.get("window");
 
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
+export const DragAndDrop: React.FC = () => {
+
+  const [measure, setMeasure] = useState<MeasureProps | null>(null);
+  const redBox = useSharedValue({
+    x: 0,
+    y: 0,
+    backgroundColor: 'pink',
+  })
   const boxTrash = useRef<Animated.View>(null);
   const textTrash = useRef<Text>(null);
 
+  const teste = () => {
+    console.log("teste function js");
+  }
 
 
-  const panGestureEvent = useAnimatedGestureHandler({
-    onStart: (event, context: { translateX: number, translateY: number }) => {
-      context.translateX = translateX.value;
-      context.translateY = translateY.value;
-
-    },
-    onActive: (event, context) => {
-      translateX.value = event.translationX + context.translateX;
-      translateY.value = event.translationY + context.translateY;
-    },
-    onEnd: (event, context) => {
-      translateX.value = withTiming(0, {
-        duration: 2000,
-      });
-      translateY.value = withTiming(0, {
-        duration: 2000,
-      });
-    },
+  const newMethod = Gesture.Pan()
+  .onUpdate(event => {
+    redBox.value = {...redBox.value ,x: event.translationX , y: event.translationY}
+    if(event.absoluteX >= (width * 0.19 + width * 0.5) && event.absoluteY <= (width * 0.19 + width * 0.08)){
+      redBox.value = {...redBox.value, backgroundColor: 'red'}
+    }
   })
+  .onEnd(() => {
+    redBox.value =  {x: 0, y:0, backgroundColor: 'pink'}
+    runOnJS(teste)()
+  })
+  .onStart(e => {
+    console.log({inital: e.absoluteX});
+  })
+
   const rStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          translateX: translateX.value,
+          translateX: !redBox.value.x ? withTiming(redBox.value.x, {duration: 1000}) : redBox.value.x,
         },
         {
-          translateY: translateY.value,
+          translateY: !redBox.value.y ? withTiming(redBox.value.y, {duration: 1000}) : redBox.value.y,
         },
       ],
+      backgroundColor: redBox.value.backgroundColor
     };
-  });
-
-  const tap = Gesture.Tap().onStart(() => {
-    console.log('tap');
   });
 
 
   return (
     <View style={styles.container}>
-      <GestureDetector gesture={tap}>
 
-      <Animated.View style={styles.boxTrash} ref={boxTrash} onLayout={event => {
-        setMeasure({
-          height: event.nativeEvent.layout.height,
-          width: event.nativeEvent.layout.width,
-          x: event.nativeEvent.layout.x,
-          y: event.nativeEvent.layout.y
-        })
-      }}>
-        <Text style={styles.titleTrash} ref={textTrash}>{measure?.x}</Text>
-      </Animated.View>
+        <Animated.View style={styles.boxTrash} ref={boxTrash} onLayout={event => {
+          setMeasure({
+            height: event.nativeEvent.layout.height,
+            width: event.nativeEvent.layout.width,
+            x: event.nativeEvent.layout.x,
+            y: event.nativeEvent.layout.y
+          })
+        }}>
+          <Text style={styles.titleTrash} ref={textTrash}>{measure?.y}</Text>
+        </Animated.View>
 
-      
-      </GestureDetector>
-
-      <PanGestureHandler onGestureEvent={panGestureEvent}>
+      <GestureDetector gesture={newMethod}>
         <Animated.View
           style={[styles.square, rStyle]}
         />
-      </PanGestureHandler>
-
+      </GestureDetector>
 
     </View>
   );
@@ -103,20 +99,17 @@ const styles = StyleSheet.create({
   },
   square: {
     borderRadius: 15,
-    backgroundColor: 'pink',
     height: 100,
     width: 100
   },
   boxTrash: {
-    width: 120,
-    height: 120,
+    width: width * 0.3,
+    height: width * 0.3,
     borderRadius: 5,
     backgroundColor: 'gray',
     position: 'absolute',
-    top: 10,
-    right: 0,
-    marginVertical: 20,
-    marginRight: 20,
+    top: width * 0.08,
+    right: width * 0.04,
     justifyContent: 'center',
   },
   titleTrash: {
